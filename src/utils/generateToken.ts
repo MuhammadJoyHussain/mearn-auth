@@ -1,18 +1,19 @@
-import { Response } from 'express'
+import { Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { JWT_SECRET, NODE_ENV } from '../config/env'
+import { JWT_SECRET, NODE_ENV } from '../config/env';
+import { Types } from 'mongoose';
 
-const generateToken = (res: Response, userId: Object) => {
-    const token = jwt.sign({userId}, JWT_SECRET, {
-        expiresIn: '30d'
-    });
+const generateToken = (res: Response, userId: Types.ObjectId) => {
+  const token = jwt.sign({ userId }, JWT_SECRET, {
+    expiresIn: '30d',
+  });
 
-    res.cookie('jwt', token, {
-        httpOnly: true,
-        secure: NODE_ENV !== 'development',
-        sameSite: 'strict',
-        maxAge: 30 * 24 * 60 * 60 * 1000
-    })
-}
+  res.cookie('jwt', token, {
+    httpOnly: true,
+    secure: NODE_ENV !== 'development',
+    sameSite: 'strict',
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  });
+};
 
 export default generateToken;
