@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import asyncHandler from 'express-async-handler';
 import User from '../models/userModel';
 import { AuthenticatedRequest, IUser } from '../interfaces/userInterface';
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { JWT_SECRET } from '../config/env';
 
 const protect = asyncHandler(
@@ -18,6 +18,8 @@ const protect = asyncHandler(
         req.user = (await User.findById(decoded.userId).select(
           '-password'
         )) as IUser;
+
+        console.log(req.user);
 
         next();
       } catch (error) {

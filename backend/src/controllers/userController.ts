@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import asyncHandler from 'express-async-handler';
 import generateToken from '../utils/generateToken';
 import User from '../models/userModel';
+import { AuthenticatedRequest } from '../interfaces/userInterface';
 
 // @desc Auth user/set token
 // route POST /api/user/auth
@@ -71,15 +72,47 @@ const logoutUser = asyncHandler(async (req: Request, res: Response) => {
 // @desc Get user profile
 // route Get /api/user/profile
 // @access Public
-const getUserProfile = asyncHandler(async (req: Request, res: Response) => {
-  res.status(200).json({ message: 'User Profile' });
-});
+const getUserProfile = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const user = {
+      _id: req.user?._id,
+      name: req.user?.name,
+      email: req.user?.email,
+    };
+
+    res.status(200).json(user);
+  }
+);
 
 // @desc Update user
 // route Put /api/user/profile
 // @access Public
-const updateUser = asyncHandler(async (req: Request, res: Response) => {
-  res.status(200).json({ message: 'Update User' });
-});
+const updateUser = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const user = await User.findById(req.user?._id);
+
+    if (user) {
+      user.name = req.body.name || user.name;
+      user.email = req.body.email || user.email;
+
+      if (req.body.password) {
+        user.password = req.body.password;
+      }
+
+      const updatedUser = await user.save();
+
+      res.status(200).json({
+        _id: updatedUser._id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+      });
+    } else {
+      res.status(404);
+      throw new Error('User not found');
+    }
+
+    res.status(200).json({ message: 'Update User' });
+  }
+);
 
 export { authUser, registerUser, logoutUser, getUserProfile, updateUser };
